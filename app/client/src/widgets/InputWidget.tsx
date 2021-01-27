@@ -44,6 +44,7 @@ class InputWidget extends BaseWidget<InputWidgetProps, WidgetState> {
   static getTriggerPropertyMap(): TriggerPropertiesMap {
     return {
       onTextChanged: true,
+      onSubmit: true,
     };
   }
 
@@ -136,6 +137,17 @@ class InputWidget extends BaseWidget<InputWidgetProps, WidgetState> {
     this.props.updateWidgetMetaProperty("isFocused", focusState);
   };
 
+  handleKeyDown = (e: any) => {
+    if (e.keyCode === 13 && this.props.onSubmit) {
+      super.executeAction({
+        dynamicString: this.props.onSubmit,
+        event: {
+          type: EventType.ON_SUBMIT,
+        },
+      });
+    }
+  };
+
   getPageView() {
     const value = this.props.text || "";
     const isInvalid =
@@ -149,27 +161,35 @@ class InputWidget extends BaseWidget<InputWidgetProps, WidgetState> {
     if (this.props.maxChars) conditionalProps.maxChars = this.props.maxChars;
     if (this.props.maxNum) conditionalProps.maxNum = this.props.maxNum;
     if (this.props.minNum) conditionalProps.minNum = this.props.minNum;
+
+    const eventListeners = {
+      onKeyDown: this.handleKeyDown,
+    };
+
     return (
-      <InputComponent
-        value={value}
-        isInvalid={isInvalid}
-        onValueChange={this.onValueChange}
-        widgetId={this.props.widgetId}
-        inputType={this.props.inputType}
-        disabled={this.props.isDisabled}
-        label={this.props.label}
-        defaultValue={this.props.defaultText}
-        placeholder={this.props.placeholderText}
-        isLoading={this.props.isLoading}
-        multiline={
-          this.props.bottomRow - this.props.topRow > 1 &&
-          this.props.inputType === "TEXT"
-        }
-        stepSize={1}
-        onFocusChange={this.handleFocusChange}
-        showError={!!this.props.isFocused}
-        {...conditionalProps}
-      />
+      <div {...eventListeners}>
+        <InputComponent
+          value={value}
+          isInvalid={isInvalid}
+          onValueChange={this.onValueChange}
+          widgetId={this.props.widgetId}
+          inputType={this.props.inputType}
+          disabled={this.props.isDisabled}
+          label={this.props.label}
+          defaultValue={this.props.defaultText}
+          placeholder={this.props.placeholderText}
+          isLoading={this.props.isLoading}
+          multiline={
+            this.props.bottomRow - this.props.topRow > 1 &&
+            this.props.inputType === "TEXT"
+          }
+          stepSize={1}
+          onFocusChange={this.handleFocusChange}
+          showError={!!this.props.isFocused}
+          disableNewLineOnPressEnterKey={!!this.props.onSubmit}
+          {...conditionalProps}
+        />
+      </div>
     );
   }
 
@@ -215,6 +235,7 @@ export interface InputWidgetProps extends WidgetProps, WithMeta {
   isRequired?: boolean;
   isFocused?: boolean;
   isDirty?: boolean;
+  onSubmit?: string;
 }
 
 export default InputWidget;

@@ -136,6 +136,13 @@ class InputComponent extends React.Component<
         return "text";
     }
   }
+  onKeyDownTextArea = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isEnterKey = e.key === "Enter" || e.keyCode === 13;
+    const { disableNewLineOnPressEnterKey } = this.props;
+    if (isEnterKey && disableNewLineOnPressEnterKey && !e.shiftKey) {
+      e.preventDefault();
+    }
+  };
   private numericInputComponent = () => (
     <NumericInput
       value={this.props.value}
@@ -169,6 +176,7 @@ class InputComponent extends React.Component<
       growVertically={false}
       onFocus={() => this.setFocusState(true)}
       onBlur={() => this.setFocusState(false)}
+      onKeyDown={this.onKeyDownTextArea}
     />
   );
 
@@ -267,6 +275,7 @@ export interface InputComponentProps extends ComponentProps {
   isInvalid: boolean;
   showError: boolean;
   onFocusChange: (state: boolean) => void;
+  disableNewLineOnPressEnterKey?: boolean;
 }
 
 export default InputComponent;
